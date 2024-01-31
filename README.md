@@ -18,9 +18,9 @@ SinaraML Framework provides Sinara Server, Sinara Storage, Sinara Lib, Sinara St
 To start you off, go to [**Getting started page**](https://github.com/4-DS/sinara-tutorials/wiki/Getting-started) to try **SinaraML Tutorials**
 
 # Installation
-To install SinaraML CLI into your environment, run:
+To install SinaraML Jupyter CLI into your Sinara server environment, run:
 ```
-pip install sinaraml
+pip install sinaraml_jupyter
 ```
 Reload shell or reboot your machine after installation to enable CLI commands
 
@@ -29,20 +29,5 @@ Commands start with the keyword sinara (similar to git, docker, kubectl)<br>
 If a command call is made without a mandatory parameter, help is displayed on the available parameters and methods of calling the command, for example:
 
 ```
-sinara server create
-```
-```
-sinara server start
-```
-
-Or, for a remote VM platform:
-```
-sinara server create --platform remote_vm
-```
-```
-sinara server start
-```
-To remove a server, run:
-```
-sinara server remove
+sinara pipeline create
 ```
