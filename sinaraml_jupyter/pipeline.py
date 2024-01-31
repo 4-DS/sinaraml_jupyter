@@ -47,48 +47,45 @@ class SinaraPipeline():
     @staticmethod
     def ensure_dataflow_fabric_repo_exists(args):
         dataflow_fabric_repo_url = dataflow_fabric_default_repos[args.type]
-        repo_folder = PurePath(tempfile.gettempdir()) / '.sinaraml' / args.type
-        Path(repo_folder).mkdir(parents=True, exist_ok=False)
+        repo_folder = PurePath(tempfile.gettempdir()) / '.sinaraml' / str(args.type)
+        Path(repo_folder).mkdir(parents=True, exist_ok=True)
         repo_folder = Path(repo_folder)
         work_dir = Path(__file__).resolve().parent
 
-        if not repo_folder.exists():
+        if not (repo_folder / '.git').exists():
             git_cmd = f"git clone --recursive {dataflow_fabric_repo_url} {repo_folder}"
             process = subprocess.run(git_cmd, cwd=work_dir, universal_newlines=True, shell=True)
             if process.returncode != 0:
-                raise Exception(work_dir, git_cmd, output=process.stdout)
+                raise Exception(git_cmd)
             
         return repo_folder
 
     @staticmethod
-    def call_dataflow_fabric_command(dataflow_fabric_command, work_dir, repo_folder):
-        process = subprocess.run(dataflow_fabric_command, cwd=repo_folder, universal_newlines=True, shell=True)
+    def call_dataflow_fabric_command(dataflow_fabric_command, work_dir):
+        process = subprocess.run(dataflow_fabric_command, cwd=work_dir, universal_newlines=True, shell=True)
         if process.returncode != 0:
-            raise Exception(work_dir, dataflow_fabric_command, output=process.stdout)
+            raise Exception(dataflow_fabric_command)
 
     @staticmethod
     def create(args):
-        create_pipeline_cmd = f"python sinara_pipeline_create.py {step_template_default_repo} {step_template_default_substep_notebook}"
+        create_pipeline_cmd = f"python sinara_pipeline_create.py {step_template_default_repo[args.type]} {step_template_default_substep_notebook[args.type]}"
 
         repo_folder = SinaraPipeline.ensure_dataflow_fabric_repo_exists(args)
-        work_dir = Path(__file__).resolve().parent
         
-        SinaraPipeline.call_dataflow_fabric_command(create_pipeline_cmd, work_dir, repo_folder)
+        SinaraPipeline.call_dataflow_fabric_command(create_pipeline_cmd, repo_folder)
 
     @staticmethod
     def clone(args):
-        clone_pipeline_cmd = f"python sinara_pipeline_clone.py {step_template_default_repo} {step_template_default_substep_notebook}"
+        clone_pipeline_cmd = f"python sinara_pipeline_clone.py {step_template_default_repo[args.type]} {step_template_default_substep_notebook[args.type]}"
 
         repo_folder = SinaraPipeline.ensure_dataflow_fabric_repo_exists(args)
-        work_dir = Path(__file__).resolve().parent
         
-        SinaraPipeline.call_dataflow_fabric_command(clone_pipeline_cmd, work_dir, repo_folder)
+        SinaraPipeline.call_dataflow_fabric_command(clone_pipeline_cmd, repo_folder)
 
     @staticmethod
     def push(args):
-        push_pipeline_cmd = f"python sinara_pipeline_push.py {step_template_default_repo} {step_template_default_substep_notebook}"
+        push_pipeline_cmd = f"python sinara_pipeline_push.py {step_template_default_repo[args.type]} {step_template_default_substep_notebook[args.type]}"
 
         repo_folder = SinaraPipeline.ensure_dataflow_fabric_repo_exists(args)
-        work_dir = Path(__file__).resolve().parent
         
-        SinaraPipeline.call_dataflow_fabric_command(push_pipeline_cmd, work_dir, repo_folder)
+        SinaraPipeline.call_dataflow_fabric_command(push_pipeline_cmd, repo_folder)
