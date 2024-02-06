@@ -3,8 +3,10 @@ from .sinaraml_types import SinaraPipelineType, \
                             step_template_default_repo, \
                             step_template_default_substep_notebook
 import subprocess
-from pathlib import Path, PurePath
+from pathlib import Path
 import tempfile
+import os
+import shutil
 
 class SinaraPipeline():
 
@@ -29,35 +31,35 @@ class SinaraPipeline():
     @staticmethod
     def add_create_handler(pipeline_cmd_parser):
         SinaraPipeline.create_parser = pipeline_cmd_parser.add_parser('create', help='create sinara pipeline')
-        SinaraPipeline.create_parser.add_argument('--type', default=SinaraPipelineType.ML, type=SinaraPipelineType, choices=list(SinaraPipelineType), help='sinara pipeline type (default: %(default)s)')
+        SinaraPipeline.create_parser.add_argument('--type', type=SinaraPipelineType, choices=list(SinaraPipelineType), help='sinara pipeline type (default: %(default)s)')
         SinaraPipeline.create_parser.set_defaults(func=SinaraPipeline.create)
 
     @staticmethod
     def add_clone_handler(pipeline_cmd_parser):
         SinaraPipeline.clone_parser = pipeline_cmd_parser.add_parser('clone', help='clone sinara pipeline')
-        SinaraPipeline.clone_parser.add_argument('--type', default=SinaraPipelineType.ML, type=SinaraPipelineType, choices=list(SinaraPipelineType), help='sinara pipeline type (default: %(default)s)')
+        SinaraPipeline.clone_parser.add_argument('--type', type=SinaraPipelineType, choices=list(SinaraPipelineType), help='sinara pipeline type (default: %(default)s)')
         SinaraPipeline.clone_parser.set_defaults(func=SinaraPipeline.clone)
 
     @staticmethod
     def add_push_handler(pipeline_cmd_parser):
         SinaraPipeline.push_parser = pipeline_cmd_parser.add_parser('push', help='push sinara pipeline')
-        SinaraPipeline.push_parser.add_argument('--type', default=SinaraPipelineType.ML, type=SinaraPipelineType, choices=list(SinaraPipelineType), help='sinara pipeline type (default: %(default)s)')
+        SinaraPipeline.push_parser.add_argument('--type', type=SinaraPipelineType, choices=list(SinaraPipelineType), help='sinara pipeline type (default: %(default)s)')
         SinaraPipeline.push_parser.set_defaults(func=SinaraPipeline.push)
 
     @staticmethod
     def ensure_dataflow_fabric_repo_exists(args):
         dataflow_fabric_repo_url = dataflow_fabric_default_repos[args.type]
-        repo_folder = PurePath(tempfile.gettempdir()) / '.sinaraml' / str(args.type)
-        Path(repo_folder).mkdir(parents=True, exist_ok=True)
-        repo_folder = Path(repo_folder)
-        work_dir = Path(__file__).resolve().parent
+        repo_folder = Path(tempfile.gettempdir()) / '.sinaraml' / str(args.type)
 
-        if not (repo_folder / '.git').exists():
-            git_cmd = f"git clone --recursive {dataflow_fabric_repo_url} {repo_folder}"
-            process = subprocess.run(git_cmd, cwd=work_dir, universal_newlines=True, shell=True)
-            if process.returncode != 0:
-                raise Exception(git_cmd)
-            
+        if repo_folder.exists():
+            shutil.rmtree(repo_folder)
+        repo_folder.mkdir(parents=True, exist_ok=True)
+
+        git_cmd = f"git clone --recursive {dataflow_fabric_repo_url} {repo_folder}"
+        process = subprocess.run(git_cmd, cwd=repo_folder, universal_newlines=True, shell=True)
+        if process.returncode != 0:
+            raise Exception(git_cmd)
+
         return repo_folder
 
     @staticmethod
@@ -65,27 +67,49 @@ class SinaraPipeline():
         process = subprocess.run(dataflow_fabric_command, cwd=work_dir, universal_newlines=True, shell=True)
         if process.returncode != 0:
             raise Exception(dataflow_fabric_command)
+        
+    @staticmethod
+    def ensure_pipeline_type(args, command):
+        type_input = int(input(f"Please, enter pipeline type to {command} 1) ML 2) CV: "))
+        if type_input == 1:
+            args.type = SinaraPipelineType.ML
+        elif type_input == 2:
+            args.type = SinaraPipelineType.CV
+        else:
+            args.type = None
 
     @staticmethod
     def create(args):
-        create_pipeline_cmd = f"python sinara_pipeline_create.py {step_template_default_repo[args.type]} {step_template_default_substep_notebook[args.type]}"
+        curr_dir = os.getcwd()
 
-        repo_folder = SinaraPipeline.ensure_dataflow_fabric_repo_exists(args)
+        if not args.type:
+            while not args.type:
+                SinaraPipeline.ensure_pipeline_type(args, "create")
         
+        create_pipeline_cmd = f"python sinara_pipeline_create.py --step_template_git={step_template_default_repo[args.type]} --step_template_nb_substep={step_template_default_substep_notebook[args.type]} --current_dir={curr_dir}"
+        repo_folder = SinaraPipeline.ensure_dataflow_fabric_repo_exists(args)
         SinaraPipeline.call_dataflow_fabric_command(create_pipeline_cmd, repo_folder)
 
     @staticmethod
     def clone(args):
-        clone_pipeline_cmd = f"python sinara_pipeline_clone.py {step_template_default_repo[args.type]} {step_template_default_substep_notebook[args.type]}"
+        curr_dir = os.getcwd()
 
+        if not args.type:
+            while not args.type:
+                SinaraPipeline.ensure_pipeline_type(args, "clone")
+
+        clone_pipeline_cmd = f"python sinara_pipeline_clone.py --step_template_git={step_template_default_repo[args.type]} --step_template_nb_substep={step_template_default_substep_notebook[args.type]} --current_dir={curr_dir}"
         repo_folder = SinaraPipeline.ensure_dataflow_fabric_repo_exists(args)
-        
         SinaraPipeline.call_dataflow_fabric_command(clone_pipeline_cmd, repo_folder)
 
     @staticmethod
     def push(args):
-        push_pipeline_cmd = f"python sinara_pipeline_push.py {step_template_default_repo[args.type]} {step_template_default_substep_notebook[args.type]}"
+        curr_dir = os.getcwd()
 
+        if not args.type:
+            while not args.type:
+                SinaraPipeline.ensure_pipeline_type(args, "push")
+
+        push_pipeline_cmd = f"python sinara_pipeline_push.py --step_template_git={step_template_default_repo[args.type]} --step_template_nb_substep={step_template_default_substep_notebook[args.type]} --current_dir={curr_dir}"
         repo_folder = SinaraPipeline.ensure_dataflow_fabric_repo_exists(args)
-        
         SinaraPipeline.call_dataflow_fabric_command(push_pipeline_cmd, repo_folder)
