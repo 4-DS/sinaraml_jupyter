@@ -70,7 +70,12 @@ class SinaraPipeline():
         
     @staticmethod
     def ensure_pipeline_type(args, command):
-        type_input = int(input(f"Please, enter pipeline type to {command} 1) ML 2) CV: "))
+        type_input = None
+        while not type_input:
+            try:
+                type_input = int(input(f"Please, enter pipeline type to {command} 1) ML 2) CV: "))
+            except:
+                type_input = None
         if type_input == 1:
             args.type = SinaraPipelineType.ML
         elif type_input == 2:
