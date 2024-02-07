@@ -14,7 +14,7 @@ class SinaraPipeline():
     root_parser = None
     subject_parser = None
     create_parser = None
-    clone_parser = None
+    pull_parser = None
     push_parser = None
 
     @staticmethod
@@ -25,7 +25,7 @@ class SinaraPipeline():
         pipeline_subparsers = parser_pipeline.add_subparsers(title='action', dest='action', help='Action to do with subject')
 
         SinaraPipeline.add_create_handler(pipeline_subparsers)
-        SinaraPipeline.add_clone_handler(pipeline_subparsers)
+        SinaraPipeline.add_pull_handler(pipeline_subparsers)
         SinaraPipeline.add_push_handler(pipeline_subparsers)
 
     @staticmethod
@@ -35,10 +35,10 @@ class SinaraPipeline():
         SinaraPipeline.create_parser.set_defaults(func=SinaraPipeline.create)
 
     @staticmethod
-    def add_clone_handler(pipeline_cmd_parser):
-        SinaraPipeline.clone_parser = pipeline_cmd_parser.add_parser('clone', help='clone sinara pipeline')
-        SinaraPipeline.clone_parser.add_argument('--type', type=SinaraPipelineType, choices=list(SinaraPipelineType), help='sinara pipeline type (default: %(default)s)')
-        SinaraPipeline.clone_parser.set_defaults(func=SinaraPipeline.clone)
+    def add_pull_handler(pipeline_cmd_parser):
+        SinaraPipeline.pull_parser = pipeline_cmd_parser.add_parser('pull', help='pull sinara pipeline')
+        SinaraPipeline.pull_parser.add_argument('--type', type=SinaraPipelineType, choices=list(SinaraPipelineType), help='sinara pipeline type (default: %(default)s)')
+        SinaraPipeline.pull_parser.set_defaults(func=SinaraPipeline.pull)
 
     @staticmethod
     def add_push_handler(pipeline_cmd_parser):
@@ -96,16 +96,16 @@ class SinaraPipeline():
         SinaraPipeline.call_dataflow_fabric_command(create_pipeline_cmd, repo_folder)
 
     @staticmethod
-    def clone(args):
+    def pull(args):
         curr_dir = os.getcwd()
 
         if not args.type:
             while not args.type:
-                SinaraPipeline.ensure_pipeline_type(args, "clone")
+                SinaraPipeline.ensure_pipeline_type(args, "pull")
 
-        clone_pipeline_cmd = f"python sinara_pipeline_clone.py --step_template_git={step_template_default_repo[args.type]} --step_template_nb_substep={step_template_default_substep_notebook[args.type]} --current_dir={curr_dir}"
+        pull_pipeline_cmd = f"python sinara_pipeline_pull.py --step_template_git={step_template_default_repo[args.type]} --step_template_nb_substep={step_template_default_substep_notebook[args.type]} --current_dir={curr_dir}"
         repo_folder = SinaraPipeline.ensure_dataflow_fabric_repo_exists(args)
-        SinaraPipeline.call_dataflow_fabric_command(clone_pipeline_cmd, repo_folder)
+        SinaraPipeline.call_dataflow_fabric_command(pull_pipeline_cmd, repo_folder)
 
     @staticmethod
     def push(args):
