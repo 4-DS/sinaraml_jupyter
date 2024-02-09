@@ -13,7 +13,7 @@ class SinaraPluginLoader():
                     plugin_module.get_supported_infras()
                     plugins.append(p.name)
             except Exception as e:
-                logging.error(e)
+                logging.debug(e)
         return plugins
     
     @staticmethod
