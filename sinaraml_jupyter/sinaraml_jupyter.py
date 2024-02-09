@@ -3,9 +3,22 @@
 import argparse
 import logging
 from .pipeline import SinaraPipeline
+from .plugin_loader import SinaraPluginLoader
 
 def init_cli(root_parser, subject_parser):
-    SinaraPipeline.add_command_handlers(root_parser, subject_parser)
+    overloaded_modules = []
+
+    for infra_plugin in SinaraPluginLoader.get_infra_plugins():
+        module = SinaraPluginLoader.get_infra_plugin(infra_plugin)
+        for plugin_class in module.get_plugin_classes():
+            for base in plugin_class.__bases__:
+                overloaded_modules.append(base.__name__)
+            plugin_class.add_command_handlers(root_parser, subject_parser)
+
+    if not 'SinaraPipeline' in overloaded_modules:
+        SinaraPipeline.add_command_handlers(root_parser, subject_parser)
+    
+
 
 def setup_logging(use_vebose=False):
     logging.basicConfig(format="%(levelname)s: %(message)s")
