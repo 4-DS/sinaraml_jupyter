@@ -84,7 +84,7 @@ class SinaraPipeline():
 
 
         git_cmd = f"git -c credential.helper=\'!f() {{ sleep 1; echo \"username=${{GIT_USER}}\"; echo \"password=${{GIT_PASSWORD}}\"; }}; f\' clone --recursive {fabric_repo_url} {repo_folder}"
-        print(f'{fabric_repo_username}, {fabric_repo_password}')
+        
         process = subprocess.run(git_cmd,
                                  cwd=repo_folder,
                                  universal_newlines=True,
