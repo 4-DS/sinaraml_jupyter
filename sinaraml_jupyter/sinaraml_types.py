@@ -6,15 +6,37 @@ class SinaraPipelineType(Enum):
 
     def __str__(self):
         return self.value
-
+    
 dataflow_fabric_default_repos = {
-  SinaraPipelineType.ML: 'https://github.com/4-DS/dataflow_fabric_ml_default.git',
-  SinaraPipelineType.CV: 'https://github.com/4-DS/dataflow_fabric_cv_rest.git'
+  SinaraPipelineType.ML: {
+      'url': 'https://github.com/4-DS/dataflow_fabric_ml_default.git',
+      'username': '1',
+      'password': '2'
+      },
+  SinaraPipelineType.CV: {
+      'url': 'https://github.com/4-DS/dataflow_fabric_cv_rest.git',
+      'username': '',
+      'password': ''
+      }
 }
 
 step_template_default_repo = {
-    SinaraPipelineType.ML: 'https://github.com/4-DS/pipeline-step_template.git',
-    SinaraPipelineType.CV: 'https://github.com/4-DS/pipeline-step_template.git'
+  SinaraPipelineType.ML: {
+      'url': 'https://github.com/4-DS/pipeline-step_template.git',
+      'provider_url': 'https://github.com',
+      'provider_organization_api': 'https://api.github.com',
+      'provider_organization_url': 'https://github.com/4-DS',
+      'username': '',
+      'password': ''
+      },
+  SinaraPipelineType.CV: {
+      'url': 'https://github.com/4-DS/pipeline-step_template.git',
+      'provider_url': 'https://github.com',
+      'provider_organization_api': 'https://api.github.com',
+      'provider_organization_url': 'https://github.com/4-DS',
+      'username': '',
+      'password': ''
+      }
 }
 
 step_template_default_substep_notebook = {
