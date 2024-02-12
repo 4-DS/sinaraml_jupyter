@@ -7,6 +7,7 @@ from pathlib import Path
 import tempfile
 import os
 import shutil
+import logging
 
 class SinaraPipeline():
 
@@ -84,7 +85,7 @@ class SinaraPipeline():
 
 
         git_cmd = f"git -c credential.helper=\'!f() {{ sleep 1; echo \"username=${{GIT_USER}}\"; echo \"password=${{GIT_PASSWORD}}\"; }}; f\' clone --recursive {fabric_repo_url} {repo_folder}"
-        
+
         process = subprocess.run(git_cmd,
                                  cwd=repo_folder,
                                  universal_newlines=True,
@@ -179,8 +180,12 @@ class SinaraPipeline():
                               f"--git_provider_organization_api={step_template_provider_organization_api} "\
                               f"--git_provider_organization_url={step_template_provider_organization_url}"
         
-        repo_folder = SinaraPipeline.ensure_dataflow_fabric_repo_exists(args)
-        SinaraPipeline.call_dataflow_fabric_command(create_pipeline_cmd, repo_folder)
+        try:
+            repo_folder = SinaraPipeline.ensure_dataflow_fabric_repo_exists(args)
+            SinaraPipeline.call_dataflow_fabric_command(create_pipeline_cmd, repo_folder)
+        except Exception as e:
+            logging.debug(e)
+            raise Exception('Error while executing fabric scripts, launch CLI with --verbose to see details')
 
     @staticmethod
     def pull(args):
@@ -206,8 +211,12 @@ class SinaraPipeline():
                             f"--git_provider_organization_api={step_template_provider_organization_api} "\
                             f"--git_provider_organization_url={step_template_provider_organization_url}"
         
-        repo_folder = SinaraPipeline.ensure_dataflow_fabric_repo_exists(args)
-        SinaraPipeline.call_dataflow_fabric_command(pull_pipeline_cmd, repo_folder)
+        try:
+            repo_folder = SinaraPipeline.ensure_dataflow_fabric_repo_exists(args)
+            SinaraPipeline.call_dataflow_fabric_command(pull_pipeline_cmd, repo_folder)
+        except Exception as e:
+            logging.debug(e)
+            raise Exception('Error while executing fabric scripts, launch CLI with --verbose to see details')
 
     @staticmethod
     def push(args):
@@ -233,5 +242,9 @@ class SinaraPipeline():
                             f"--git_provider_organization_api={step_template_provider_organization_api} "\
                             f"--git_provider_organization_url={step_template_provider_organization_url}"
 
-        repo_folder = SinaraPipeline.ensure_dataflow_fabric_repo_exists(args)
-        SinaraPipeline.call_dataflow_fabric_command(push_pipeline_cmd, repo_folder)
+        try:
+            repo_folder = SinaraPipeline.ensure_dataflow_fabric_repo_exists(args)
+            SinaraPipeline.call_dataflow_fabric_command(push_pipeline_cmd, repo_folder)
+        except Exception as e:
+            logging.debug(e)
+            raise Exception('Error while executing fabric scripts, launch CLI with --verbose to see details')
