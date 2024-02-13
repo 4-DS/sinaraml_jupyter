@@ -23,7 +23,6 @@ dataflow_fabric_default_repos = {
 step_template_default_repo = {
   SinaraPipelineType.ML: {
       'url': 'https://github.com/4-DS/pipeline-step_template.git',
-      'provider_url': 'https://github.com',
       'provider_organization_api': 'https://api.github.com',
       'provider_organization_url': 'https://github.com/4-DS',
       'username': '',
@@ -31,7 +30,6 @@ step_template_default_repo = {
       },
   SinaraPipelineType.CV: {
       'url': 'https://github.com/4-DS/pipeline-step_template.git',
-      'provider_url': 'https://github.com',
       'provider_organization_api': 'https://api.github.com',
       'provider_organization_url': 'https://github.com/4-DS',
       'username': '',
