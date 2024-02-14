@@ -94,14 +94,14 @@ class SinaraPipeline():
 
         git_cmd = f"git -c credential.helper=\'!f() {{ sleep 1; echo \"username=${{GIT_USER}}\"; echo \"password=${{GIT_PASSWORD}}\"; }}; f\' clone --recursive {fabric_repo_url} {repo_folder}"
 
+        temp_env = os.environ.copy()
+        temp_env["GIT_USER"] = fabric_repo_username
+        temp_env["GIT_PASSWORD"] = fabric_repo_password
         process = subprocess.run(git_cmd,
                                  cwd=repo_folder,
                                  universal_newlines=True,
                                  shell=True,
-                                 env={
-                                    "GIT_USER": fabric_repo_username,
-                                    "GIT_PASSWORD": fabric_repo_password
-        })
+                                 env=temp_env)
         if process.returncode != 0:
             raise Exception(git_cmd)
 
@@ -109,7 +109,7 @@ class SinaraPipeline():
 
     @staticmethod
     def call_dataflow_fabric_command(dataflow_fabric_command, work_dir):
-        process = subprocess.run(dataflow_fabric_command, cwd=work_dir, universal_newlines=True, shell=True)
+        process = subprocess.run(dataflow_fabric_command, cwd=work_dir, universal_newlines=True, shell=True, env=os.environ)
         if process.returncode != 0:
             raise Exception(dataflow_fabric_command)
         
