@@ -101,7 +101,7 @@ class SinaraPipeline():
                                  cwd=repo_folder,
                                  universal_newlines=True,
                                  shell=True,
-                                 env=temp_env)
+                                 env=dict(temp_env))
         if process.returncode != 0:
             raise Exception(git_cmd)
 
@@ -109,7 +109,7 @@ class SinaraPipeline():
 
     @staticmethod
     def call_dataflow_fabric_command(dataflow_fabric_command, work_dir):
-        process = subprocess.run(dataflow_fabric_command, cwd=work_dir, universal_newlines=True, shell=True, env=os.environ)
+        process = subprocess.run(dataflow_fabric_command, cwd=work_dir, universal_newlines=True, shell=True, env=dict(os.environ))
         if process.returncode != 0:
             raise Exception(dataflow_fabric_command)
         
