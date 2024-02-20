@@ -81,6 +81,8 @@ class SinaraPipeline():
         SinaraPipeline.update_parser.add_argument('--fabric', type=str, help='sinara fabric repo url')
         SinaraPipeline.update_parser.add_argument('--fabric_git_user', type=str, help='sinara fabric repo git user name')
         SinaraPipeline.update_parser.add_argument('--fabric_git_password', type=str, help='sinara fabric repo git password')
+        SinaraPipeline.update_parser.add_argument('--step_template_provider_organization_api', type=str, help='sinara step template repo git provider api url')
+        SinaraPipeline.update_parser.add_argument('--step_template_provider_organization_url', type=str, help='sinara step template repo git provider organization url')
         SinaraPipeline.update_parser.set_defaults(func=SinaraPipeline.update)
 
     @staticmethod
@@ -131,19 +133,19 @@ class SinaraPipeline():
     @staticmethod
     def get_step_template_repo(args):
         repo_url = step_template_default_repo[args.type]['url'] \
-            if not args.step_template else args.step_template
+            if not 'step_template' in args or not args.step_template else args.step_template
         
         repo_user = step_template_default_repo[args.type]['username'] \
-            if not args.step_template_git_user else args.step_template_git_user
+             if not 'step_template_git_user' in args or not args.step_template_git_user else args.step_template_git_user
         
         repo_password = step_template_default_repo[args.type]['password'] \
-            if not args.step_template_git_password else args.step_template_git_password
+            if not 'step_template_git_password' in args or not args.step_template_git_password else args.step_template_git_password
         
         repo_provider_organization_api = step_template_default_repo[args.type]['provider_organization_api'] \
-            if not args.step_template_provider_organization_api else args.step_template_provider_organization_api
+            if not 'step_template_provider_organization_api' in args or not args.step_template_provider_organization_api else args.step_template_provider_organization_api
 
         repo_provider_organization_url = step_template_default_repo[args.type]['provider_organization_url'] \
-            if not args.step_template_provider_organization_url else args.step_template_provider_organization_url
+            if not 'step_template_provider_organization_url' in args or not args.step_template_provider_organization_url else args.step_template_provider_organization_url
 
         return repo_url, repo_user, repo_password, \
                repo_provider_organization_api, repo_provider_organization_url
@@ -253,15 +255,25 @@ class SinaraPipeline():
 
     @staticmethod
     def update(args):
+        curr_dir = os.getcwd()
 
         if args.component == "sinaralib":
-            update_sinaralib_pipeline_cmd = f"python sinara_pipeline_update_sinaralib.py"
+
+            if not args.type:
+                while not args.type:
+                    SinaraPipeline.ensure_pipeline_type(args, f"update {args.component}")
+
+            step_template_url, step_template_username, \
+                step_template_password, \
+                step_template_provider_organization_api, \
+                step_template_provider_organization_url = SinaraPipeline.get_step_template_repo(args)
+
+            update_sinaralib_pipeline_cmd = f"python sinara_pipeline_update_sinaralib.py "\
+                                            f"--current_dir={curr_dir} "\
+                                            f"--git_provider_organization_api={step_template_provider_organization_api} "\
+                                            f"--git_provider_organization_url={step_template_provider_organization_url}"
         else:
             raise Exception(f'Component {args.component} is not supported by update')
-        
-        if not args.type:
-            while not args.type:
-                SinaraPipeline.ensure_pipeline_type(args, f"update {args.component}")
 
         try:
             repo_folder = SinaraPipeline.ensure_dataflow_fabric_repo_exists(args)

@@ -10,8 +10,8 @@ class SinaraPipelineType(Enum):
 dataflow_fabric_default_repos = {
   SinaraPipelineType.ML: {
       'url': 'https://github.com/4-DS/dataflow_fabric_ml_default.git',
-      'username': '1',
-      'password': '2'
+      'username': '',
+      'password': ''
       },
   SinaraPipelineType.CV: {
       'url': 'https://github.com/4-DS/dataflow_fabric_cv_rest.git',
