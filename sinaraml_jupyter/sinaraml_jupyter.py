@@ -14,8 +14,7 @@ class Gitref:
 
 def check_any_cli_exists():
     if not SinaraCliManager.check_last_update():
-        #args = Gitref(gitref = "https://github.com/4-DS/mlops_jupyter_organization.git")
-        args = Gitref(gitref = "https://dt-ai.gitlab.yandexcloud.net/dsml_platform/jupyter_ml_ops_organization.git")
+        args = Gitref(gitref = "https://github.com/4-DS/mlops_jupyter_organization.git")
         SinaraCliManager.install_from_git(args)
 
 def init_cli(root_parser, subject_parser, platform=None):
