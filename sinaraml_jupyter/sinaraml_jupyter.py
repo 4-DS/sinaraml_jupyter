@@ -2,23 +2,33 @@
 
 import argparse
 import logging
-from .pipeline import SinaraPipeline
-from .plugin_loader import SinaraPluginLoader
+import sys
+from dataclasses import dataclass
+from .org_loader import SinaraOrgLoader
+from .cli_manager import SinaraCliManager
 
-def init_cli(root_parser, subject_parser):
-    overloaded_modules = []
 
-    for infra_plugin in SinaraPluginLoader.get_infra_plugins():
-        module = SinaraPluginLoader.get_infra_plugin(infra_plugin)
-        for plugin_class in module.get_plugin_classes():
-            for base in plugin_class.__bases__:
-                overloaded_modules.append(base.__name__)
-            plugin_class.add_command_handlers(root_parser, subject_parser)
+@dataclass
+class Gitref:
+    gitref: str
 
-    if not 'SinaraPipeline' in overloaded_modules:
-        SinaraPipeline.add_command_handlers(root_parser, subject_parser)
-    
+def check_any_cli_exists():
+    if not SinaraCliManager.check_last_update():
+        #args = Gitref(gitref = "https://github.com/4-DS/mlops_jupyter_organization.git")
+        args = Gitref(gitref = "https://dt-ai.gitlab.yandexcloud.net/dsml_platform/jupyter_ml_ops_organization.git")
+        SinaraCliManager.install_from_git(args)
 
+def init_cli(root_parser, subject_parser, platform=None):
+    root_parser.subjects = []
+
+    SinaraCliManager.add_command_handlers(root_parser, subject_parser)
+
+    org_name = 'personal'
+    if platform and '_' in platform:
+        org_name = platform.split('_')[0]
+    org = SinaraOrgLoader.load_organization(org_name)
+    if org:
+        org.add_command_handlers(root_parser, subject_parser)    
 
 def setup_logging(use_vebose=False):
     logging.basicConfig(format="%(levelname)s: %(message)s")
@@ -42,6 +52,16 @@ def main():
     subject_subparser = parser.add_subparsers(title='subject', dest='subject', help=f"subject to use")
     parser.add_argument('-v', '--verbose', action='store_true', help="display verbose logs")
     parser.add_argument('--version', action='version', version=f"SinaraML Jupyter CLI {get_cli_version()}")
+
+    sinara_platform = None
+    for i in range(1, len(sys.argv)):
+        a = sys.argv[i]
+        if a.startswith('--platform'):
+            sinara_platform = a.split('=')[1] if "=" in a else sys.argv[i+1]
+            break
+    
+    if not sinara_platform:
+        check_any_cli_exists()
 
     # each cli plugin adds and manages subcommand handlers (starting from subject handler) to root parser
     init_cli(parser, subject_subparser)
