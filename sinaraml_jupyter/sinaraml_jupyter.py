@@ -26,7 +26,14 @@ def init_cli(root_parser, subject_parser, platform=None):
         org_name = platform.split('_')[0]
     org = SinaraOrgManager.load_organization(org_name)
     if org:
-        org.add_command_handlers(root_parser, subject_parser)    
+        org.add_command_handlers(root_parser, subject_parser)
+
+def update_orgs():
+    for org in SinaraOrgManager.get_orgs():
+        from collections import namedtuple
+        Args = namedtuple('Args', ['name', 'internal'])
+        args = Args(name=org["name"], internal=True)
+        SinaraOrgManager.update_org(args)
 
 def setup_logging(use_vebose=False):
     logging.basicConfig(format="%(levelname)s: %(message)s")
@@ -60,7 +67,8 @@ def main():
     
     if not sinara_platform:
         check_any_org_exists()
-
+    
+    update_orgs()
     # each cli plugin adds and manages subcommand handlers (starting from subject handler) to root parser
     init_cli(parser, subject_subparser)
 
@@ -82,16 +90,18 @@ def main():
                 if args.subject == choice:
                     print(subparser.format_help())
 
-    # call appropriate handler for the whole command line from a cli plugin if installed
-    if hasattr(args, 'func'):
-        try:
-            args.func(args)
-            exit_code = 0
-        except Exception as e:
-            if args.verbose:
-                logging.exception(e)
-            else:
-                logging.error(e)
+    args.func(args)
+    exit_code = 0
+    # # call appropriate handler for the whole command line from a cli plugin if installed
+    # if hasattr(args, 'func'):
+    #     try:
+    #         args.func(args)
+    #         exit_code = 0
+    #     except Exception as e:
+    #         if args.verbose:
+    #             logging.exception(e)
+    #         else:
+    #             logging.error(e)
     
     return exit_code
 
