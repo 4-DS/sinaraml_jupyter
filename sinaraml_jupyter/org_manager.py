@@ -65,8 +65,10 @@ class SinaraOrgManager:
 
     @staticmethod
     def get_orgs_dir(org_name = None):
-        #dir = Path(Path.home(), '.sinaraml', 'orgs')
-        dir = Path(Path.home(), 'work', 'orgs')
+        if os.environ.get('SINARA_DEBUG') == '1':
+            dir = Path(Path.home(), 'work', 'orgs')
+        else:
+            dir = Path(Path.home(), '.sinaraml', 'orgs')
         if org_name:
             dir = Path(dir, org_name)
         return dir
