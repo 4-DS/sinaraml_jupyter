@@ -19,10 +19,10 @@ def check_any_org_exists():
         if os.environ.get('SINARA_ORG'):
             platform = os.environ.get('SINARA_PLATFORM')
             sinara_org = json.loads(os.environ.get('SINARA_ORG').replace("'", '"'))
-            body = [body for body in sinara_org["cli_bodies"] if platform in body["platform_names"]]
+            platform_short = platform.split('_')[-1]
+            body = [body for body in sinara_org["cli_bodies"] if platform_short in body["platform_names"]]
             if body and "mlops_jupyter_organization" in body[0].keys():
                 jupyter_cli_org = body[0]["mlops_jupyter_organization"]
-            
         args = Gitref(gitref = jupyter_cli_org)
         SinaraOrgManager.install_from_git(args)
 
