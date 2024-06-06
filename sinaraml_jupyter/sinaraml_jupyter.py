@@ -68,7 +68,7 @@ def main():
     parser.add_argument('-v', '--verbose', action='store_true', help="display verbose logs")
     parser.add_argument('--version', action='version', version=f"SinaraML Jupyter CLI {get_cli_version()}")
 
-    sinara_platform = None
+    sinara_platform = os.environ.get('SINARA_PLATFORM')
     for i in range(1, len(sys.argv)):
         a = sys.argv[i]
         if a.startswith('--platform'):
@@ -80,7 +80,7 @@ def main():
     
     update_orgs()
     # each cli plugin adds and manages subcommand handlers (starting from subject handler) to root parser
-    init_cli(parser, subject_subparser)
+    init_cli(parser, subject_subparser, sinara_platform)
 
     # parse the command line and get all arguments
     args = parser.parse_known_args()[0]
