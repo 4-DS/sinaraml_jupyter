@@ -75,8 +75,8 @@ def main():
             sinara_platform = a.split('=')[1] if "=" in a else sys.argv[i+1]
             break
     
-    if not sinara_platform:
-        check_any_org_exists()
+    #if not sinara_platform:
+    check_any_org_exists()
     
     update_orgs()
     # each cli plugin adds and manages subcommand handlers (starting from subject handler) to root parser
