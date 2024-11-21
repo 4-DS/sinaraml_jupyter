@@ -100,18 +100,18 @@ def main():
                 if args.subject == choice:
                     print(subparser.format_help())
 
-    args.func(args)
-    exit_code = 0
+    # args.func(args)
+    # exit_code = 0
     # # call appropriate handler for the whole command line from a cli plugin if installed
-    # if hasattr(args, 'func'):
-    #     try:
-    #         args.func(args)
-    #         exit_code = 0
-    #     except Exception as e:
-    #         if args.verbose:
-    #             logging.exception(e)
-    #         else:
-    #             logging.error(e)
+    if hasattr(args, 'func'):
+        try:
+            args.func(args)
+            exit_code = 0
+        except Exception as e:
+            if args.verbose:
+                logging.exception(e)
+            else:
+                logging.error(e)
     
     return exit_code
 
